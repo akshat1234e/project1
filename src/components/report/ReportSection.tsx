@@ -13,12 +13,12 @@ interface ReportSectionProps {
 export function ReportSection({ title, content, className }: ReportSectionProps) {
     return (
         <ScrollReveal>
-            <div className={cn("space-y-4", className)}>
-                <h3 className="text-sm font-bold text-[#6B6B6B] uppercase tracking-widest">
+            <div className={cn("space-y-6", className)}>
+                <h3 className="text-[10px] font-black text-accent uppercase tracking-[0.3em]">
                     {title}
                 </h3>
-                <div className="bg-white border border-[#E5E5E5] p-8">
-                    <p className="text-lg text-[#111111] leading-relaxed whitespace-pre-wrap">
+                <div className="bg-white/5 border border-white/10 p-10 backdrop-blur-sm">
+                    <p className="text-lg text-white leading-relaxed whitespace-pre-wrap font-medium tracking-tight">
                         {content}
                     </p>
                 </div>

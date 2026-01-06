@@ -23,14 +23,22 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        // Fetch user profile for organization_id
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("organization_id")
+            .eq("id", user.id)
+            .single();
+
         const formData = await req.json();
-        const { verdict, reason } = evaluateDiagnostic(formData);
+        const { verdict, reason, score, flags, breakdown } = evaluateDiagnostic(formData);
 
         // 1. Create Payment (Mock)
         const { data: payment, error: paymentError } = await supabase
             .from("payments")
             .insert({
                 userId: user.id,
+                organization_id: profile?.organization_id,
                 amount: 499900,
                 status: "COMPLETED",
                 razorpayOrderId: `order_${Date.now()}`,
@@ -45,6 +53,7 @@ export async function POST(req: Request) {
             .from("submissions")
             .insert({
                 userId: user.id,
+                organization_id: profile?.organization_id,
                 paymentId: payment.id,
                 formData: formData,
                 status: "COMPLETED",
@@ -61,23 +70,30 @@ export async function POST(req: Request) {
             .insert({
                 submissionId: submission.id,
                 userId: user.id,
+                organization_id: profile?.organization_id,
                 verdict: verdict,
                 verdictReason: reason,
                 sections: {
                     whyVerdict: reason,
                     buyerPerspective: "The buyer is looking for immediate relief from the pain described.",
-                    primaryObjection: "The primary objection will be the lack of trust proof.",
+                    primaryObjection: flags.length > 0 ? `Detected Red Flags: ${flags.join(", ")}` : "No major red flags detected.",
                     trustGap: "You need to bridge the gap between your promise and your evidence.",
                     fix: "Focus on gathering one strong case study.",
                     nextAction: "Re-validate with 3 more potential buyers.",
+                    teamAnalysis: formData.team_experience,
+                    marketAnalysis: formData.market_tailwinds,
+                    moatAnalysis: formData.moat_description,
                 },
                 ruleScore: {
-                    clarity: 8,
-                    pain: 7,
-                    trust: 4
+                    total: score,
+                    team: breakdown.team,
+                    market: breakdown.market,
+                    product: breakdown.product,
+                    traction: breakdown.traction,
                 },
                 aiGenerated: {
-                    summary: "AI analysis suggests a strong core idea with execution gaps."
+                    summary: `VC Score: ${score}/100. ${reason}`,
+                    redFlags: flags
                 }
             })
             .select()

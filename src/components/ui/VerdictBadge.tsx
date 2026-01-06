@@ -11,15 +11,15 @@ interface VerdictBadgeProps {
 }
 
 const colors = {
-    PROCEED: "bg-[#0F5132] text-white",
-    FIX: "bg-[#8A5A00] text-white",
-    KILL: "bg-[#7A1E1E] text-white",
+    PROCEED: "bg-verdict-proceed/20 text-verdict-proceed border-verdict-proceed/50 shadow-[0_0_15px_rgba(0,255,157,0.2)]",
+    FIX: "bg-verdict-fix/20 text-verdict-fix border-verdict-fix/50 shadow-[0_0_15px_rgba(255,184,0,0.2)]",
+    KILL: "bg-verdict-kill/20 text-verdict-kill border-verdict-kill/50 shadow-[0_0_15px_rgba(255,0,77,0.2)]",
 };
 
 export function VerdictBadge({ verdict, className }: VerdictBadgeProps) {
     return (
         <span className={cn(
-            "inline-flex items-center px-3 py-1 text-xs font-bold tracking-wider rounded-none",
+            "inline-flex items-center px-4 py-1 text-[10px] font-black tracking-[0.2em] rounded-none border uppercase",
             colors[verdict],
             className
         )}>

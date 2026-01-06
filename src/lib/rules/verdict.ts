@@ -22,34 +22,96 @@ export interface SubmissionData {
     evidence_links: string;
     inaction_cost_type: string[];
     inaction_description: string;
+    // VC-Level Fields
+    team_experience: string;
+    technical_founder: boolean;
+    team_track_record: string;
+    market_size_tam: string;
+    market_tailwinds: string;
+    moat_type: string[];
+    moat_description: string;
+    unit_economics_ltv: string;
+    unit_economics_cac: string;
 }
 
-export function evaluateDiagnostic(data: SubmissionData) {
-    const flags = {
-        hasBudget: data.budget_authority,
-        isFrequent: ["daily", "weekly"].includes(data.pain_frequency),
-        hasProof: data.proof_type.length > 0,
-        hasInactionCost: data.inaction_cost_type.length > 0,
+export interface DiagnosticResult {
+    verdict: Verdict;
+    reason: string;
+    score: number;
+    flags: string[];
+    breakdown: {
+        team: number;
+        market: number;
+        product: number;
+        traction: number;
     };
+}
 
-    let verdict: Verdict = "PROCEED";
-    let reason = "This is a high-conviction opportunity with clear buyer intent and frequent pain.";
+export function evaluateDiagnostic(data: SubmissionData): DiagnosticResult {
+    const flags: string[] = [];
 
-    if (!flags.hasBudget) {
-        verdict = "KILL";
-        reason = "No budget authority detected. You are selling to someone who cannot sign the check.";
-    } else if (!flags.isFrequent) {
-        verdict = "KILL";
-        reason = "The pain frequency is too low. Buyers rarely pay for 'sometimes' problems.";
-    } else if (!flags.hasProof && !flags.hasInactionCost) {
-        verdict = "FIX";
-        reason = "You have no proof of trust and the cost of inaction is unclear. Buyers will default to 'no'.";
-    } else if (!flags.hasProof) {
-        verdict = "FIX";
-        reason = "Strong pain but weak trust. You need more evidence that you can actually deliver.";
+    // 1. Team Score (35%)
+    let teamScore = 0;
+    if (data.technical_founder) teamScore += 15;
+    else flags.push("No technical co-founder detected");
+
+    if (data.team_experience.length > 50) teamScore += 10;
+    if (data.team_track_record.length > 50) teamScore += 10;
+
+    // 2. Market Score (25%)
+    let marketScore = 0;
+    const tamLower = data.market_size_tam.toLowerCase();
+    if (tamLower.includes("b") || tamLower.includes("billion")) marketScore += 15;
+    else if (tamLower.includes("m") || tamLower.includes("million")) marketScore += 10;
+    else flags.push("Market size may be too small for VC scale");
+
+    if (data.market_tailwinds.length > 50) marketScore += 10;
+
+    // 3. Product/Buyer Score (20%)
+    let productScore = 0;
+    if (data.budget_authority) productScore += 10;
+    else flags.push("Selling to non-budget holders");
+
+    if (["daily", "weekly"].includes(data.pain_frequency)) productScore += 10;
+    else flags.push("Low pain frequency");
+
+    // 4. Traction/Trust Score (20%)
+    let tractionScore = 0;
+    if (data.proof_type.length > 0) tractionScore += 10;
+    if (data.inaction_cost_type.length > 0) tractionScore += 10;
+
+    // Unit Economics Check
+    const ltv = parseFloat(data.unit_economics_ltv.replace(/[^0-9.]/g, ''));
+    const cac = parseFloat(data.unit_economics_cac.replace(/[^0-9.]/g, ''));
+    if (!isNaN(ltv) && !isNaN(cac)) {
+        if (ltv / cac < 3) flags.push("Weak unit economics (LTV/CAC < 3)");
     }
 
-    return { verdict, reason };
+    const totalScore = teamScore + marketScore + productScore + tractionScore;
+
+    let verdict: Verdict = "PROCEED";
+    let reason = "This is a high-conviction opportunity with strong VC-level fundamentals.";
+
+    if (totalScore < 40 || flags.length >= 3) {
+        verdict = "KILL";
+        reason = "Fundamental weaknesses in team, market, or unit economics make this a high-risk venture.";
+    } else if (totalScore < 70 || flags.length >= 1) {
+        verdict = "FIX";
+        reason = "Promising signs, but critical gaps in defensibility or trust need to be addressed before scaling.";
+    }
+
+    return {
+        verdict,
+        reason,
+        score: totalScore,
+        flags,
+        breakdown: {
+            team: teamScore,
+            market: marketScore,
+            product: productScore,
+            traction: tractionScore,
+        }
+    };
 }
 
 // ============================================================================

@@ -23,6 +23,13 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        // Fetch user profile for organization_id
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("organization_id")
+            .eq("id", user.id)
+            .single();
+
         const data = await req.json();
 
         // 1. Classify Sentiment
@@ -50,6 +57,7 @@ export async function POST(req: Request) {
             .from("post_sale_snapshots")
             .insert({
                 userId: user.id,
+                organization_id: profile?.organization_id,
                 companyName: user.user_metadata?.company_name || "Unknown",
                 salesPromise: data.salesPromise,
                 usageSignals: data.usageSignals,

@@ -1,22 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FAFAFA;
-  --foreground: #111111;
-  --muted: #6B6B6B;
+  --background: #050505;
+  --foreground: #FFFFFF;
+  --muted: #A1A1AA;
 
-  --verdict-proceed: #0F5132;
-  --verdict-fix: #8A5A00;
-  --verdict-kill: #7A1E1E;
+  --accent: #00F2FF;
+  --accent-secondary: #7000FF;
 
-  --selection-bg: #111111;
-  --selection-text: #FAFAFA;
+  --verdict-proceed: #00FF85;
+  --verdict-fix: #FFB800;
+  --verdict-kill: #FF004D;
+
+  --selection-bg: #00F2FF;
+  --selection-text: #050505;
+
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-secondary: var(--accent-secondary);
 
   --color-verdict-proceed: var(--verdict-proceed);
   --color-verdict-fix: var(--verdict-fix);
@@ -37,6 +45,8 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  cursor: none;
+  /* Hide default cursor for custom cursor */
 }
 
 h1,
@@ -45,8 +55,23 @@ h3,
 h4,
 h5,
 h6 {
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+.text-glow {
+  text-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+}
+
+.border-glow {
+  box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
 }
 
 .text-balance {

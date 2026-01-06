@@ -9,6 +9,7 @@ import { VerdictBadge } from "@/components/ui/VerdictBadge";
 import { FileText, Plus, User as UserIcon, LogOut } from "lucide-react";
 import Link from "next/link";
 import { getProfile, Profile } from "@/lib/db/profiles";
+import { useBranding } from "@/components/providers/BrandingProvider";
 
 interface ReportSummary {
     id: string;
@@ -23,6 +24,7 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<any>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
+    const { organization } = useBranding();
 
     useEffect(() => {
         async function fetchDashboardData() {
@@ -64,52 +66,57 @@ export default function DashboardPage() {
 
     if (loading) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA]">
-                <div className="text-xl font-bold animate-pulse text-[#111111]">LOADING REALITY...</div>
+            <div className="flex min-h-screen items-center justify-center bg-background">
+                <div className="text-xl font-black animate-pulse text-accent tracking-[0.5em] text-glow uppercase">LOADING REALITY...</div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA]">
+        <div className="min-h-screen bg-background relative overflow-hidden">
+            {/* Ambient Background Glows */}
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-secondary/10 rounded-full blur-[120px] pointer-events-none" />
+
             {/* Header */}
-            <header className="h-20 bg-white border-b border-[#E5E5E5] px-6">
+            <header className="h-20 glass border-b border-white/10 px-6 sticky top-0 z-50">
                 <div className="max-w-6xl mx-auto h-full flex items-center justify-between">
                     <div className="flex items-center gap-8">
-                        <div className="h-10 w-10 bg-[#111111] flex items-center justify-center">
-                            <span className="text-white font-bold text-lg">SD</span>
+                        <div className="h-10 w-10 bg-accent flex items-center justify-center shadow-[0_0_20px_rgba(0,242,255,0.3)]">
+                            <span className="text-background font-black text-lg">SD</span>
                         </div>
-                        <nav className="hidden md:flex items-center gap-6">
-                            <Link href="/dashboard" className="text-sm font-bold text-[#111111] uppercase tracking-wider">Dashboard</Link>
-                            <Link href="/post-sale" className="text-sm font-medium text-[#6B6B6B] hover:text-[#111111] uppercase tracking-wider transition-colors">Post-Sale</Link>
+                        <nav className="hidden md:flex items-center gap-8">
+                            <Link href="/dashboard" className="text-[10px] font-black text-white uppercase tracking-[0.2em] hover:text-accent transition-colors">Dashboard</Link>
+                            <Link href="/post-sale" className="text-[10px] font-black text-muted hover:text-accent uppercase tracking-[0.2em] transition-colors">Post-Sale</Link>
+                            <Link href="/admin/settings" className="text-[10px] font-black text-muted hover:text-accent uppercase tracking-[0.2em] transition-colors">Settings</Link>
                         </nav>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-[#FAFAFA] border border-[#E5E5E5] flex items-center justify-center text-[#6B6B6B]">
+                        <div className="h-10 w-10 rounded-none bg-white/5 border border-white/10 flex items-center justify-center text-accent">
                             <UserIcon size={20} />
                         </div>
-                        <button onClick={handleSignOut} className="text-[#6B6B6B] hover:text-[#7A1E1E] transition-colors">
+                        <button onClick={handleSignOut} className="text-muted hover:text-verdict-kill transition-colors">
                             <LogOut size={20} />
                         </button>
                     </div>
                 </div>
             </header>
 
-            <main className="max-w-6xl mx-auto px-6 py-12 space-y-12">
+            <main className="max-w-6xl mx-auto px-6 py-16 space-y-16 relative z-10">
                 <ScrollReveal>
-                    <div className="space-y-2">
-                        <h1 className="text-4xl font-bold text-[#111111]">
+                    <div className="space-y-4">
+                        <h1 className="text-5xl font-black text-white tracking-tighter text-glow uppercase">
                             Welcome, {profile?.full_name || user?.user_metadata?.full_name || "Founder"}
                         </h1>
-                        <p className="text-[#6B6B6B] text-lg">
-                            {profile?.company_name || user?.user_metadata?.company_name || "Your Startup"} Diagnostic Dashboard
+                        <p className="text-accent text-xs font-black uppercase tracking-[0.3em]">
+                            {organization?.name || profile?.company_name || user?.user_metadata?.company_name || "Your Startup"} Diagnostic Dashboard
                         </p>
                     </div>
                 </ScrollReveal>
 
                 <div className="space-y-8">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-[#111111] uppercase tracking-tight">Diagnostics</h2>
+                        <h2 className="text-sm font-black text-white uppercase tracking-[0.2em]">Diagnostics</h2>
                         <Link href="/diagnostic">
                             <Button size="sm" className="gap-2">
                                 <Plus size={16} /> New Diagnostic
@@ -118,18 +125,18 @@ export default function DashboardPage() {
                     </div>
 
                     {reports.length > 0 ? (
-                        <div className="grid gap-4">
+                        <div className="grid gap-6">
                             {reports.map((report) => (
                                 <ScrollReveal key={report.id}>
                                     <Link href={`/report/${report.id}`}>
-                                        <div className="bg-white border border-[#E5E5E5] p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-[#111111] transition-all group">
-                                            <div className="flex items-center gap-6">
-                                                <div className="h-12 w-12 bg-[#FAFAFA] flex items-center justify-center text-[#111111]">
-                                                    <FileText size={24} />
+                                        <div className="glass p-8 flex flex-col md:flex-row md:items-center justify-between gap-8 hover:border-accent transition-all group border-glow">
+                                            <div className="flex items-center gap-8">
+                                                <div className="h-14 w-14 bg-white/5 flex items-center justify-center text-accent border border-white/10">
+                                                    <FileText size={28} />
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <h3 className="font-bold text-[#111111]">{report.company_name}</h3>
-                                                    <p className="text-sm text-[#6B6B6B]">
+                                                <div className="space-y-2">
+                                                    <h3 className="text-xl font-black text-white uppercase tracking-tight">{report.company_name}</h3>
+                                                    <p className="text-[10px] font-black text-muted uppercase tracking-widest">
                                                         {new Date(report.created_at).toLocaleDateString("en-US", {
                                                             month: "long",
                                                             day: "numeric",
@@ -138,11 +145,11 @@ export default function DashboardPage() {
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-8">
+                                            <div className="flex items-center gap-12">
                                                 <StatusIndicator status={report.status} />
                                                 <VerdictBadge verdict={report.verdict} />
-                                                <div className="text-[#6B6B6B] group-hover:text-[#111111] transition-colors">
-                                                    <Plus size={20} className="rotate-45" />
+                                                <div className="text-muted group-hover:text-accent transition-colors">
+                                                    <Plus size={24} className="rotate-45" />
                                                 </div>
                                             </div>
                                         </div>
@@ -152,18 +159,18 @@ export default function DashboardPage() {
                         </div>
                     ) : (
                         <ScrollReveal delay={0.2}>
-                            <div className="border-2 border-dashed border-[#E5E5E5] bg-[#FAFAFA] p-20 flex flex-col items-center text-center space-y-6">
-                                <div className="h-16 w-16 bg-white border border-[#E5E5E5] flex items-center justify-center text-[#6B6B6B]">
-                                    <FileText size={32} />
+                            <div className="glass p-24 flex flex-col items-center text-center space-y-8 border-glow">
+                                <div className="h-20 w-20 bg-white/5 border border-white/10 flex items-center justify-center text-accent">
+                                    <FileText size={40} />
                                 </div>
-                                <div className="space-y-2">
-                                    <h3 className="text-xl font-bold text-[#111111]">No diagnostics yet</h3>
-                                    <p className="text-[#6B6B6B] max-w-xs mx-auto">
+                                <div className="space-y-4">
+                                    <h3 className="text-2xl font-black text-white uppercase tracking-tight">No diagnostics yet</h3>
+                                    <p className="text-muted text-sm max-w-xs mx-auto tracking-wide">
                                         You haven't run a diagnostic yet. Start one to get your verdict.
                                     </p>
                                 </div>
                                 <Link href="/diagnostic">
-                                    <Button size="lg" className="px-12">
+                                    <Button size="lg" className="px-16">
                                         Start Diagnostic
                                     </Button>
                                 </Link>

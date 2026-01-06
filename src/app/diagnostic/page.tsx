@@ -31,15 +31,32 @@ const formSchema = z.object({
     evidence_links: z.string(),
     inaction_cost_type: z.array(z.string()).min(1, "Select at least one"),
     inaction_description: z.string().min(10, "Describe the cost of inaction"),
+    // Team Section
+    team_experience: z.string().min(10, "Describe your team's experience"),
+    technical_founder: z.boolean(),
+    team_track_record: z.string().min(10, "Describe your team's track record"),
+    // Market Section
+    market_size_tam: z.string().min(1, "TAM is required"),
+    market_tailwinds: z.string().min(10, "Describe the market tailwinds"),
+    // Defensibility Section
+    moat_type: z.array(z.string()).min(1, "Select at least one moat type"),
+    moat_description: z.string().min(10, "Describe your defensibility"),
+    // Unit Economics Section
+    unit_economics_ltv: z.string().min(1, "LTV is required"),
+    unit_economics_cac: z.string().min(1, "CAC is required"),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 const steps = [
     { id: "context", title: "Founder Context", icon: <Briefcase size={24} /> },
+    { id: "team", title: "Team Strength", icon: <Users size={24} /> },
+    { id: "market", title: "Market Opportunity", icon: <Search size={24} /> },
     { id: "buyer", title: "Buyer Reality", icon: <Users size={24} /> },
     { id: "pain", title: "Pain & Workflow", icon: <Zap size={24} /> },
     { id: "alternatives", title: "Alternatives", icon: <Search size={24} /> },
+    { id: "defensibility", title: "Defensibility", icon: <ShieldAlert size={24} /> },
+    { id: "economics", title: "Unit Economics", icon: <Zap size={24} /> },
     { id: "proof", title: "Trust & Inaction", icon: <ShieldAlert size={24} /> },
 ];
 
@@ -52,17 +69,23 @@ export default function DiagnosticPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             budget_authority: false,
+            technical_founder: false,
             proof_type: [],
             inaction_cost_type: [],
+            moat_type: [],
         }
     });
 
     const nextStep = async () => {
         const fieldsByStep: any[][] = [
             ["company_name", "stage", "domain"],
+            ["team_experience", "technical_founder", "team_track_record"],
+            ["market_size_tam", "market_tailwinds"],
             ["buyer_role", "budget_authority", "buyer_justification"],
             ["workflow", "pain_frequency", "pain_trigger"],
             ["current_solution", "why_good_enough"],
+            ["moat_type", "moat_description"],
+            ["unit_economics_ltv", "unit_economics_cac"],
             ["proof_type", "evidence_links", "inaction_cost_type", "inaction_description"],
         ];
         const isValid = await trigger(fieldsByStep[currentStep]);
@@ -92,7 +115,7 @@ export default function DiagnosticPage() {
         }
     };
 
-    const toggleArrayItem = (field: "proof_type" | "inaction_cost_type", value: string) => {
+    const toggleArrayItem = (field: "proof_type" | "inaction_cost_type" | "moat_type", value: string) => {
         const current = watch(field) as string[];
         if (current.includes(value)) {
             setValue(field, current.filter((i) => i !== value));
@@ -102,12 +125,18 @@ export default function DiagnosticPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] py-20">
-            <div className="max-w-3xl mx-auto px-6">
+        <div className="min-h-screen bg-background py-20 relative overflow-hidden">
+            {/* Ambient Background Glows */}
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-secondary/10 rounded-full blur-[120px] pointer-events-none" />
+
+            <div className="max-w-3xl mx-auto px-6 relative z-10">
                 <div className="mb-16 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h1 className="text-4xl font-bold text-[#111111]">Intake Diagnostic</h1>
-                        <span className="text-sm font-bold text-[#6B6B6B] uppercase tracking-widest">
+                        <h1 className="text-4xl font-black text-white tracking-tighter text-glow">
+                            Intake Diagnostic
+                        </h1>
+                        <span className="text-xs font-bold text-accent uppercase tracking-[0.3em]">
                             Step {currentStep + 1} / {steps.length}
                         </span>
                     </div>
@@ -117,16 +146,17 @@ export default function DiagnosticPage() {
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentStep}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
+                        initial={{ opacity: 0, x: 20, filter: "blur(10px)" }}
+                        animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                        exit={{ opacity: 0, x: -20, filter: "blur(10px)" }}
+                        transition={{ duration: 0.4, ease: "circOut" }}
+                        className="glass p-12 border-glow"
                     >
-                        <div className="flex items-center gap-4 mb-12">
-                            <div className="h-12 w-12 bg-[#111111] text-white flex items-center justify-center">
+                        <div className="flex items-center gap-6 mb-12">
+                            <div className="h-14 w-14 bg-accent text-background flex items-center justify-center shadow-[0_0_30px_rgba(0,242,255,0.3)]">
                                 {steps[currentStep].icon}
                             </div>
-                            <h2 className="text-2xl font-bold text-[#111111] uppercase tracking-tight">
+                            <h2 className="text-2xl font-black text-white uppercase tracking-tight">
                                 {steps[currentStep].title}
                             </h2>
                         </div>
@@ -140,20 +170,20 @@ export default function DiagnosticPage() {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Stage</label>
-                                            <select {...register("stage")} className="flex h-[48px] w-full border border-[#E5E5E5] bg-[#FAFAFA] px-4 py-2 text-base focus:border-[#111111] focus:outline-none rounded-none">
-                                                <option value="pre-seed">Pre-seed</option>
-                                                <option value="seed">Seed</option>
-                                                <option value="series-a">Series A</option>
+                                            <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Stage</label>
+                                            <select {...register("stage")} className="flex h-[48px] w-full border border-white/10 bg-white/5 px-4 py-2 text-base text-white focus:border-accent focus:outline-none rounded-none backdrop-blur-md appearance-none">
+                                                <option value="pre-seed" className="bg-background">Pre-seed</option>
+                                                <option value="seed" className="bg-background">Seed</option>
+                                                <option value="series-a" className="bg-background">Series A</option>
                                             </select>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Domain</label>
-                                            <select {...register("domain")} className="flex h-[48px] w-full border border-[#E5E5E5] bg-[#FAFAFA] px-4 py-2 text-base focus:border-[#111111] focus:outline-none rounded-none">
-                                                <option value="ai">AI / Machine Learning</option>
-                                                <option value="fintech">Fintech</option>
-                                                <option value="saas">SaaS</option>
-                                                <option value="other">Other</option>
+                                            <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Domain</label>
+                                            <select {...register("domain")} className="flex h-[48px] w-full border border-white/10 bg-white/5 px-4 py-2 text-base text-white focus:border-accent focus:outline-none rounded-none backdrop-blur-md appearance-none">
+                                                <option value="ai" className="bg-background">AI / Machine Learning</option>
+                                                <option value="fintech" className="bg-background">Fintech</option>
+                                                <option value="saas" className="bg-background">SaaS</option>
+                                                <option value="other" className="bg-background">Other</option>
                                             </select>
                                         </div>
                                     </div>
@@ -163,7 +193,50 @@ export default function DiagnosticPage() {
                             {currentStep === 1 && (
                                 <div className="space-y-8">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Buyer Role</label>
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Team Experience</label>
+                                        <Textarea
+                                            {...register("team_experience")}
+                                            placeholder="What makes your team uniquely qualified to solve this?"
+                                            className="min-h-[120px]"
+                                        />
+                                    </div>
+                                    <Checkbox
+                                        label="We have a technical co-founder / internal engineering team"
+                                        checked={watch("technical_founder")}
+                                        onChange={(e) => setValue("technical_founder", e.target.checked)}
+                                    />
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Team Track Record</label>
+                                        <Textarea
+                                            {...register("team_track_record")}
+                                            placeholder="Previous exits, relevant industry experience, or notable achievements."
+                                            className="min-h-[120px]"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentStep === 2 && (
+                                <div className="space-y-8">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Market Size (TAM)</label>
+                                        <Input {...register("market_size_tam")} placeholder="e.g. $10B+, 50M potential users" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Market Tailwinds</label>
+                                        <Textarea
+                                            {...register("market_tailwinds")}
+                                            placeholder="Why is now the right time? (e.g. regulatory changes, AI shifts)"
+                                            className="min-h-[150px]"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentStep === 3 && (
+                                <div className="space-y-8">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Buyer Role</label>
                                         <Input {...register("buyer_role")} placeholder="e.g. VP Engineering, CFO" />
                                     </div>
                                     <Checkbox
@@ -172,7 +245,7 @@ export default function DiagnosticPage() {
                                         onChange={(e) => setValue("budget_authority", e.target.checked)}
                                     />
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Buyer Justification</label>
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Buyer Justification</label>
                                         <Textarea
                                             {...register("buyer_justification")}
                                             placeholder="Why would they pay for this right now?"
@@ -182,10 +255,10 @@ export default function DiagnosticPage() {
                                 </div>
                             )}
 
-                            {currentStep === 2 && (
+                            {currentStep === 4 && (
                                 <div className="space-y-8">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Workflow Steps</label>
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Workflow Steps</label>
                                         <Textarea
                                             {...register("workflow")}
                                             placeholder="Step 1: ...&#10;Step 2: ..."
@@ -193,16 +266,16 @@ export default function DiagnosticPage() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Pain Frequency</label>
-                                        <select {...register("pain_frequency")} className="flex h-[48px] w-full border border-[#E5E5E5] bg-[#FAFAFA] px-4 py-2 text-base focus:border-[#111111] focus:outline-none rounded-none">
-                                            <option value="daily">Daily</option>
-                                            <option value="weekly">Weekly</option>
-                                            <option value="monthly">Monthly</option>
-                                            <option value="rarely">Rarely</option>
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Pain Frequency</label>
+                                        <select {...register("pain_frequency")} className="flex h-[48px] w-full border border-white/10 bg-white/5 px-4 py-2 text-base text-white focus:border-accent focus:outline-none rounded-none backdrop-blur-md appearance-none">
+                                            <option value="daily" className="bg-background">Daily</option>
+                                            <option value="weekly" className="bg-background">Weekly</option>
+                                            <option value="monthly" className="bg-background">Monthly</option>
+                                            <option value="rarely" className="bg-background">Rarely</option>
                                         </select>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Trigger Description</label>
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Trigger Description</label>
                                         <Textarea
                                             {...register("pain_trigger")}
                                             placeholder="What exactly triggers this pain?"
@@ -212,19 +285,19 @@ export default function DiagnosticPage() {
                                 </div>
                             )}
 
-                            {currentStep === 3 && (
+                            {currentStep === 5 && (
                                 <div className="space-y-8">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Current Solution</label>
-                                        <select {...register("current_solution")} className="flex h-[48px] w-full border border-[#E5E5E5] bg-[#FAFAFA] px-4 py-2 text-base focus:border-[#111111] focus:outline-none rounded-none">
-                                            <option value="excel">Excel / Spreadsheets</option>
-                                            <option value="tool">Existing Tool</option>
-                                            <option value="manual">Manual Process</option>
-                                            <option value="none">None</option>
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Current Solution</label>
+                                        <select {...register("current_solution")} className="flex h-[48px] w-full border border-white/10 bg-white/5 px-4 py-2 text-base text-white focus:border-accent focus:outline-none rounded-none backdrop-blur-md appearance-none">
+                                            <option value="excel" className="bg-background">Excel / Spreadsheets</option>
+                                            <option value="tool" className="bg-background">Existing Tool</option>
+                                            <option value="manual" className="bg-background">Manual Process</option>
+                                            <option value="none" className="bg-background">None</option>
                                         </select>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Why is it 'good enough'?</label>
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Why is it 'good enough'?</label>
                                         <Textarea
                                             {...register("why_good_enough")}
                                             placeholder="Why haven't they switched yet?"
@@ -234,10 +307,54 @@ export default function DiagnosticPage() {
                                 </div>
                             )}
 
-                            {currentStep === 4 && (
+                            {currentStep === 6 && (
                                 <div className="space-y-8">
                                     <div className="space-y-4">
-                                        <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Trust Proof Type</label>
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Moat Type (Defensibility)</label>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {["IP / Patents", "Network Effects", "High Switching Costs", "Economies of Scale", "Proprietary Data"].map((t) => (
+                                                <Checkbox
+                                                    key={t}
+                                                    label={t}
+                                                    checked={watch("moat_type").includes(t)}
+                                                    onChange={() => toggleArrayItem("moat_type", t)}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Moat Description</label>
+                                        <Textarea
+                                            {...register("moat_description")}
+                                            placeholder="How will you stop competitors from copying you?"
+                                            className="min-h-[150px]"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentStep === 7 && (
+                                <div className="space-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Estimated LTV</label>
+                                            <Input {...register("unit_economics_ltv")} placeholder="e.g. $5,000" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Estimated CAC</label>
+                                            <Input {...register("unit_economics_cac")} placeholder="e.g. $500" />
+                                        </div>
+                                    </div>
+                                    <p className="text-[10px] text-muted tracking-wide uppercase">
+                                        VCs look for an LTV/CAC ratio of at least 3:1.
+                                    </p>
+                                </div>
+                            )}
+
+                            {currentStep === 8 && (
+                                <div className="space-y-8">
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Trust Proof Type</label>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             {["Users", "Revenue", "Domain Experience"].map((t) => (
                                                 <Checkbox
@@ -250,11 +367,11 @@ export default function DiagnosticPage() {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Evidence Links</label>
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Evidence Links</label>
                                         <Input {...register("evidence_links")} placeholder="https://... (one per line)" />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Inaction Cost Type</label>
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Inaction Cost Type</label>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             {["Financial", "Risk", "Time"].map((t) => (
                                                 <Checkbox
@@ -267,7 +384,7 @@ export default function DiagnosticPage() {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-[#111111] uppercase tracking-widest">Inaction Description</label>
+                                        <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Inaction Description</label>
                                         <Textarea
                                             {...register("inaction_description")}
                                             placeholder="What happens if they do nothing?"

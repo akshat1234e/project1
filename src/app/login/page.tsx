@@ -60,17 +60,21 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-[#FAFAFA] px-6 py-20">
-            <div className="w-full max-w-[480px] bg-white border-2 border-[#E5E5E5] p-12 space-y-12">
+        <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-20 relative overflow-hidden">
+            {/* Ambient Background Glows */}
+            <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent-secondary/10 rounded-full blur-[120px] pointer-events-none" />
+
+            <div className="w-full max-w-[480px] glass p-12 space-y-12 border-glow relative z-10">
                 <ScrollReveal>
                     <div className="space-y-4">
-                        <div className="h-12 w-12 bg-[#111111] flex items-center justify-center">
-                            <span className="text-white font-bold text-xl">SD</span>
+                        <div className="h-14 w-14 bg-accent flex items-center justify-center shadow-[0_0_30px_rgba(0,242,255,0.3)]">
+                            <span className="text-background font-black text-2xl">SD</span>
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight text-[#111111]">
+                        <h1 className="text-4xl font-black tracking-tighter text-white text-glow uppercase">
                             {isSignUp ? "Create Account" : "Sign In"}
                         </h1>
-                        <p className="text-[#6B6B6B]">
+                        <p className="text-muted text-sm tracking-wide">
                             {isSignUp
                                 ? "This is not a free trial. You will pay before accessing."
                                 : "Welcome back to the diagnostic dashboard."}
@@ -79,14 +83,14 @@ export default function LoginPage() {
                 </ScrollReveal>
 
                 <ScrollReveal delay={0.1}>
-                    <form onSubmit={handleAuth} className="space-y-6">
-                        <div className="space-y-4">
+                    <form onSubmit={handleAuth} className="space-y-8">
+                        <div className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-[#111111]">Email Address</label>
+                                <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Email Address</label>
                                 <Input
                                     type="email"
                                     placeholder="founder@company.com"
-                                    icon={<Mail size={20} />}
+                                    icon={<Mail size={20} className="text-accent" />}
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
@@ -95,11 +99,11 @@ export default function LoginPage() {
 
                             {isSignUp && (
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-[#111111]">Full Name</label>
+                                    <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Full Name</label>
                                     <Input
                                         type="text"
                                         placeholder="John Doe"
-                                        icon={<User size={20} />}
+                                        icon={<User size={20} className="text-accent" />}
                                         value={fullName}
                                         onChange={(e) => setFullName(e.target.value)}
                                         required
@@ -109,25 +113,25 @@ export default function LoginPage() {
 
                             {isSignUp && (
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-[#111111]">Company Name</label>
+                                    <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Company Name</label>
                                     <Input
                                         type="text"
                                         placeholder="Your Company"
-                                        icon={<Building2 size={20} />}
+                                        icon={<Building2 size={20} className="text-accent" />}
                                         value={companyName}
                                         onChange={(e) => setCompanyName(e.target.value)}
                                         required
                                     />
-                                    <p className="text-[12px] text-[#6B6B6B]">This will appear in your reports</p>
+                                    <p className="text-[10px] text-muted tracking-wide">This will appear in your reports</p>
                                 </div>
                             )}
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-[#111111]">Password</label>
+                                <label className="text-[10px] font-black text-accent uppercase tracking-[0.2em]">Password</label>
                                 <Input
                                     type="password"
                                     placeholder="••••••••"
-                                    icon={<Lock size={20} />}
+                                    icon={<Lock size={20} className="text-accent" />}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
@@ -138,7 +142,6 @@ export default function LoginPage() {
                         {isSignUp && (
                             <Checkbox
                                 label="I understand this diagnostic may recommend significant changes or stopping my idea entirely. I want honest judgment, not validation."
-                                variant="warning"
                                 checked={acceptedTerms}
                                 onChange={(e) => setAcceptedTerms(e.target.checked)}
                             />
@@ -159,7 +162,7 @@ export default function LoginPage() {
                     <div className="text-center">
                         <button
                             onClick={() => setIsSignUp(!isSignUp)}
-                            className="text-sm font-medium text-[#6B6B6B] hover:text-[#111111] transition-colors"
+                            className="text-[10px] font-black text-muted hover:text-accent transition-colors uppercase tracking-[0.2em]"
                         >
                             {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Create one"}
                         </button>

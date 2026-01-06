@@ -33,16 +33,16 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         }
 
         const variants = {
-            primary: "bg-[#111111] text-white hover:bg-[#2E2E2E]",
-            secondary: "bg-[#6B6B6B] text-white hover:bg-[#111111]",
-            outline: "border-2 border-[#111111] bg-transparent text-[#111111] hover:bg-[#111111] hover:text-white",
-            ghost: "bg-transparent text-[#111111] hover:bg-[#111111]/10",
+            primary: "bg-accent text-background hover:bg-accent/90 border-glow",
+            secondary: "bg-accent-secondary text-white hover:bg-accent-secondary/90",
+            outline: "border-2 border-accent bg-transparent text-accent hover:bg-accent/10",
+            ghost: "bg-transparent text-accent hover:bg-accent/10",
         };
 
         const sizes = {
-            sm: "px-4 py-2 text-sm",
-            md: "px-6 py-3 text-base",
-            lg: "px-8 h-[56px] text-lg",
+            sm: "px-4 py-2 text-xs tracking-widest uppercase",
+            md: "px-6 py-3 text-sm tracking-widest uppercase",
+            lg: "px-8 h-[56px] text-base tracking-widest uppercase",
         };
 
         return (
@@ -51,11 +51,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 style={{ x: mouseX, y: mouseY }}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.05, letterSpacing: "0.15em" }}
+                whileTap={{ scale: 0.95 }}
                 transition={{ duration: 0.2 }}
                 className={cn(
-                    "inline-flex items-center justify-center font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111111] disabled:bg-[#E5E5E5] disabled:text-[#6B6B6B] disabled:cursor-not-allowed rounded-none",
+                    "inline-flex items-center justify-center font-black transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:bg-muted disabled:text-background disabled:cursor-not-allowed rounded-none",
                     variants[variant],
                     sizes[size],
                     className

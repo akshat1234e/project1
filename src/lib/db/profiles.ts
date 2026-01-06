@@ -7,6 +7,7 @@ export interface Profile {
     role: string | null;
     stage: string | null;
     context: string | null;
+    organization_id: string | null;
     updated_at: string | null;
 }
 

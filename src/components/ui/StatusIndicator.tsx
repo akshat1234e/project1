@@ -11,17 +11,17 @@ interface StatusIndicatorProps {
 }
 
 const colors = {
-    SUBMITTED: "bg-[#6B6B6B]",
-    PROCESSING: "bg-[#8A5A00] animate-pulse",
-    COMPLETED: "bg-[#0F5132]",
-    FAILED: "bg-[#7A1E1E]",
+    SUBMITTED: "bg-muted shadow-[0_0_10px_rgba(161,161,170,0.3)]",
+    PROCESSING: "bg-verdict-fix animate-pulse shadow-[0_0_15px_rgba(255,184,0,0.5)]",
+    COMPLETED: "bg-verdict-proceed shadow-[0_0_15px_rgba(0,255,157,0.5)]",
+    FAILED: "bg-verdict-kill shadow-[0_0_15px_rgba(255,0,77,0.5)]",
 };
 
 export function StatusIndicator({ status, className }: StatusIndicatorProps) {
     return (
-        <div className={cn("flex items-center gap-2", className)}>
-            <div className={cn("h-2 w-2 rounded-full", colors[status])} />
-            <span className="text-xs font-medium text-[#6B6B6B] uppercase tracking-tight">
+        <div className={cn("flex items-center gap-3", className)}>
+            <div className={cn("h-2.5 w-2.5 rounded-none", colors[status])} />
+            <span className="text-[10px] font-black text-muted uppercase tracking-[0.2em]">
                 {status}
             </span>
         </div>
